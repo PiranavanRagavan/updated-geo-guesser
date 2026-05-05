@@ -147,12 +147,45 @@ io.on('connection', (socket) => {
       setTimeout(() => {
         socket.to(roomCode).emit('start_game', { round: 1, totalRounds: room.totalRounds });
         io.to(roomCode).emit('game_started');
+        
+        // Auto-load first location after game starts
+        setTimeout(() => {
+          socket.emit('load_location', { roomCode });
+        }, 1000);
       }, 500);
     } catch (error) {
       console.error('Error joining room:', error);
       callback({ success: false, error: error.message });
     }
   });
+
+  // Location Data (Must match frontend's locationData.js)
+  const LOCATION_DATA = {
+    v1: { lat: 25.3245, lng: 82.9863, label: 'Kashi Vishwanath', city: 'Varanasi' },
+    v2: { lat: 21.6455, lng: 70.3901, label: 'Somnath', city: 'Prabhas Patan' },
+    v3: { lat: 13.1829, lng: 79.8343, label: 'Tirupati', city: 'Tirupati' },
+    v4: { lat: 9.9252, lng: 78.1198, label: 'Meenakshi', city: 'Madurai' },
+    v5: { lat: 19.8136, lng: 85.8312, label: 'Jagannath', city: 'Puri' },
+    v6: { lat: 22.2411, lng: 68.9707, label: 'Dwarka', city: 'Dwarka' },
+    v7: { lat: 30.7369, lng: 79.9181, label: 'Badrinath', city: 'Badrinath' },
+    v8: { lat: 30.7355, lng: 79.5670, label: 'Kedarnath', city: 'Kedarnath' },
+    c1: { lat: 11.0076, lng: 79.2987, label: 'Brihadeeswarar', city: 'Thanjavur' },
+    c2: { lat: 9.2868, lng: 79.8379, label: 'Ramanathaswamy', city: 'Rameswaram' },
+    c3: { lat: 24.6955, lng: 84.7849, label: 'Mahabodhi', city: 'Bodh Gaya' },
+    c4: { lat: 23.1815, lng: 77.4143, label: 'Sanchi', city: 'Sanchi' },
+    c5: { lat: 15.3350, lng: 76.4631, label: 'Hampi', city: 'Hampi' },
+    c6: { lat: 23.1815, lng: 75.7747, label: 'Mahakaleshwar', city: 'Ujjain' },
+    c7: { lat: 32.2596, lng: 75.3142, label: 'Vaishno Devi', city: 'Katra' },
+    c8: { lat: 19.0760, lng: 74.4960, label: 'Shirdi', city: 'Shirdi' },
+    j1: { lat: 15.3350, lng: 76.4631, label: 'Virupaksha', city: 'Hampi' },
+    j2: { lat: 12.9352, lng: 79.6245, label: 'Ekambareswarar', city: 'Kanchipuram' },
+    j3: { lat: 11.5642, lng: 79.8945, label: 'Nataraja Chidambaram', city: 'Chidambaram' },
+    j4: { lat: 10.8945, lng: 78.6789, label: 'Ranganathaswamy', city: 'Srirangam' },
+    j5: { lat: 20.2355, lng: 85.8245, label: 'Lingaraja', city: 'Bhubaneswar' },
+    j6: { lat: 14.6420, lng: 74.4890, label: 'Murudeshwar', city: 'Murdeshwar' },
+    j7: { lat: 10.9172, lng: 76.0315, label: 'Guruvayur', city: 'Guruvayur' },
+    j8: { lat: 22.3667, lng: 75.9667, label: 'Omkareshwar', city: 'Omkareshwar' },
+  };
 
   // Load Next Location (called after both players are ready)
   socket.on('load_location', (data) => {
@@ -165,15 +198,10 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Mock location selection (in production, use your location data)
-      const locations = [
-        { id: 'v1', label: 'Varanasi', lat: 25.3164, lng: 82.9789 },
-        { id: 'v2', label: 'Somnath', lat: 20.8844, lng: 71.8772 },
-        { id: 'v3', label: 'Tirupati', lat: 13.1827, lng: 79.8245 },
-        { id: 'v4', label: 'Madurai', lat: 9.9252, lng: 78.1198 },
-        { id: 'v5', label: 'Puri', lat: 19.8135, lng: 85.8312 },
-        { id: 'v6', label: 'Dwarka', lat: 22.2381, lng: 68.9679 },
-      ];
+      const locations = Object.entries(LOCATION_DATA).map(([id, data]) => ({
+        id,
+        ...data,
+      }));
 
       const availableLocations = locations.filter(
         (loc) => !room.usedLocations.includes(loc.id)

@@ -234,13 +234,17 @@ export const useGameController = () => {
 
   return {
     gameMode,
+    setGameMode,
     currentRound,
     totalRounds,
     scores,
     currentLocation,
+    setCurrentLocation,
     guesses,
+    setGuesses,
     roundResults,
     gameOver,
+    setGameOver,
     currentPlayer,
     playerGuessed,
     startGame,
